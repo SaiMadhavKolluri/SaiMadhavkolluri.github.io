@@ -1,12 +1,11 @@
 <head>
     <!-- Load the <model-viewer> web component -->
-      <!-- Import the component -->
-<script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
-<script nomodule src="https://unpkg.com/@google/model-viewer/dist/model-viewer-legacy.js"></script>
+<!-- Import the component -->
+<script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.3.0/model-viewer.min.js"></script>
 
   </head>
   <body>
     <!-- Display a 3D model in augmented reality -->
-    <model-viewer src="assets/earth.glb" ios-src="assets/earth.usdz" ar ar-modes="webxr scene-viewer quick-look" camera-controls alt="A 3D model"></model-viewer>
+    <model-viewer src="assets/earth.glb" ios-src="assets/earth.usdz" ar ar-scale="fixed" ar-modes="webxr scene-viewer quick-look" camera-controls alt="A 3D model of Earth"></model-viewer>
   </body>
   
