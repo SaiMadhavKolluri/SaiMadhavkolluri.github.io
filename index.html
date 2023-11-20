@@ -1,11 +1,28 @@
-<head>
-    <!-- Load the <model-viewer> web component -->
-<!-- Import the component -->
-<script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.3.0/model-viewer.min.js"></script>
-
-  </head>
+ </head>
   <body>
     <!-- Display a 3D model in augmented reality -->
     <model-viewer src="assets/earth.glb" ios-src="assets/earth.usdz" ar ar-scale="fixed" ar-modes="webxr scene-viewer quick-look" camera-controls alt="A 3D model of Earth"></model-viewer>
   </body>
   
+  <!DOCTYPE html>
+  <html lang="en">
+  
+      <head>
+          <meta charset="UTF-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+          <script src="https://cdn.tailwindcss.com"></script>
+          <script type="module"
+                  src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.1.1/model-viewer.min.js"></script>
+      </head>
+  
+      <body class="h-screen">
+          <main class="flex flex-col justify-start items-center space-between w-full h-full">
+              <h1 class="font-bold text-2xl py-5">Test For Mass Box AR Preview</h1>
+              <model-viewer src="assets/earth.glb" ios-src="assets/earth.usdz" ar ar-scale="fixed" ar-modes="webxr scene-viewer quick-look" camera-controls alt="A 3D model of Earth">
+
+              </model-viewer>
+          </main>
+      </body>
+  
+  </html>
