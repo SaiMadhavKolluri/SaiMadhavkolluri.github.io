@@ -10,6 +10,4 @@ const onProgress = (event) => {
     progressBar.classList.remove('hide');
   }
 };
-const modelViewerTransform = document.querySelector("model-viewer#transform"); 
-modelViewerTransform.scale = `${0.1} ${0.1} ${0.1}`;
 document.querySelector('model-viewer').addEventListener('progress', onProgress);
