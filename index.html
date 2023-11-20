@@ -1,22 +1,27 @@
-  <!DOCTYPE html>
-  <html lang="en">
-  
-      <head>
-          <meta charset="UTF-8">
-          <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  
-          <script src="https://cdn.tailwindcss.com"></script>
-          <script type="module"
-                  src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.1.1/model-viewer.min.js"></script>
-      </head>
-  
-      <body class="h-screen">
-          <main class="flex flex-col justify-start items-center space-between w-full h-full">
-              <h1 class="font-bold text-2xl py-5">Test For Mass Box AR Preview</h1>
-              <model-viewer src="assets/tv_retro.glb" ios-src="assets/tv_retro.usdz" ar ar-scale="fixed" ar-modes="webxr scene-viewer quick-look" camera-controls alt="A 3D model of Earth">
+<!DOCTYPE html>
+<html lang="en">
 
-              </model-viewer>
-          </main>
-      </body>
-  
-  </html>
+<head>
+  <meta charset="UTF-8">
+  <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.3.0/model-viewer.min.js"></script>
+</head>
+
+<body>
+  <model-viewer src="assets/tv_retro.glb" ios-src="assets/tv_retro.usdz" ar ar-scale="fixed" ar
+    ar-modes="scene-viewer webxr quick-look" camera-controls poster="poster.webp" shadow-intensity="0.54"
+    ar-scale="fixed" environment-image="aircraft_workshop_01_1k.hdr" skybox-image="aircraft_workshop_01_1k.hdr">
+    <div class="progress-bar hide" slot="progress-bar">
+      <div class="update-bar"></div>
+    </div>
+    <button slot="ar-button" id="ar-button">
+      View in your space
+    </button>
+    <div id="ar-prompt">
+      <img src="https://modelviewer.dev/shared-assets/icons/hand.png">
+    </div>
+  </model-viewer>
+
+  </main>
+</body>
+
+</html>
