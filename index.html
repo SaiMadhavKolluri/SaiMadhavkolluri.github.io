@@ -1,27 +1,38 @@
-<!DOCTYPE html>
-<html lang="en">
+
+<!doctype html><html class="no-js" lang="">
 
 <head>
-  <meta charset="UTF-8">
+  <meta charset="utf-8">
   <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.3.0/model-viewer.min.js"></script>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title></title>
+  <link rel="stylesheet" href="css/style.css">
+  <meta name="description" content="">
+
+  <meta property="og:title" content="">
+  <meta property="og:type" content="">
+  <meta property="og:url" content="">
+  <meta property="og:image" content="">
+
+  <link rel="icon" href="/favicon.ico" sizes="any">
+  <link rel="icon" href="/icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="icon.png">
+
+  <link rel="manifest" href="site.webmanifest">
+  <meta name="theme-color" content="#fafafa">
 </head>
 
 <body>
-  <model-viewer src="assets/tv_retro.glb" ios-src="assets/tv_retro.usdz" ar ar-scale="fixed" ar
-    ar-modes="scene-viewer webxr quick-look" camera-controls poster="poster.webp" shadow-intensity="0.54"
-    ar-scale="fixed" environment-image="aircraft_workshop_01_1k.hdr" skybox-image="aircraft_workshop_01_1k.hdr">
-    <div class="progress-bar hide" slot="progress-bar">
-      <div class="update-bar"></div>
-    </div>
-    <button slot="ar-button" id="ar-button">
-      View in your space
-    </button>
-    <div id="ar-prompt">
-      <img src="https://modelviewer.dev/shared-assets/icons/hand.png">
-    </div>
-  </model-viewer>
 
-  </main>
+  <!-- Add your site or application content here -->
+  <p>Hello world!.</p>
+  <model-viewer src="assets/tv_retro.glb" ios-src="assets/tv_retro.usdz" ar ar-scale="fixed" ar
+  ar-modes="scene-viewer webxr quick-look" camera-controls poster="poster.webp" shadow-intensity="0.54"
+  ar-scale="fixed" environment-image="aircraft_workshop_01_1k.hdr" skybox-image="aircraft_workshop_01_1k.hdr">
+   
+</model-viewer>
+  <script src="js/app.js"></script>
+
 </body>
 
 </html>
