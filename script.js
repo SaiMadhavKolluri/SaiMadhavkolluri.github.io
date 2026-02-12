@@ -11,3 +11,17 @@ const onProgress = (event) => {
   }
 };
 document.querySelector('model-viewer').addEventListener('progress', onProgress);
+
+// Handle loading screen
+const modelViewer = document.querySelector('model-viewer');
+const loadingScreen = document.getElementById('loading-screen');
+
+modelViewer.addEventListener('load', () => {
+  // Hide loading screen when model is ready
+  loadingScreen.classList.add('loaded');
+  
+  // Optional: Remove it from DOM after transition helps performance
+  setTimeout(() => {
+    loadingScreen.style.display = 'none';
+  }, 600); // match CSS transition time
+});
