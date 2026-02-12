@@ -8,6 +8,7 @@
     content="Explore the MASSBOX® by Exum Instruments in interactive 3D. Rotate, zoom, and view in AR.">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link type="text/css" href="./styles.css" rel="stylesheet" />
+  <link rel="icon" type="image/png" href="exum_logo.png">
 </head>
 
 <body>
@@ -25,8 +26,8 @@
 
   <!-- <model-viewer> HTML element -->
   <model-viewer src="Mass.glb" ar ar-modes="webxr scene-viewer quick-look" camera-controls tone-mapping="neutral"
-    poster="poster.webp" shadow-intensity="0.74" environment-image="ninomaru_teien_4k.hdr" exposure="1.64"
-    skybox-image="ninomaru_teien_4k.hdr" shadow-softness="1">
+    poster="poster.webp" shadow-intensity="0.74" environment-image="ninomaru_teien_2k.hdr" exposure="1.64"
+    skybox-image="ninomaru_teien_2k.hdr" shadow-softness="1">
     <button class="Hotspot" slot="hotspot-2" data-position="0.2814105961338417m 0.5003084024655067m 0.2588250611017345m"
       data-normal="0m 0.3419980891181389m 0.939700647567906m" data-visibility-attribute="visible">
       <div class="HotspotAnnotation">Sample Door</div>
@@ -41,7 +42,7 @@
     <button slot="ar-button" id="ar-button">
       View in your space
     </button>
-    <div id="ar-prompt">
+    <div id="ar-prompt" slot="ar-prompt">
       <img src="ar_hand_prompt.png">
     </div>
   </model-viewer>
