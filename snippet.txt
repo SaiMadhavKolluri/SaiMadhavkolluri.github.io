@@ -1,4 +1,9 @@
-<model-viewer src="Mass.glb" ar ar-modes="webxr scene-viewer quick-look" camera-controls tone-mapping="neutral" poster="poster.webp" shadow-intensity="0.74" environment-image="ninomaru_teien_2k.hdr" exposure="1.64" shadow-softness="1" skybox-image="ninomaru_teien_2k.hdr">
+<model-viewer src="Mass.glb" ar ar-modes="webxr scene-viewer quick-look" camera-controls tone-mapping="neutral" poster="poster.webp" shadow-intensity="0.74" environment-image="venice_sunset_4k.hdr" exposure="1.64" skybox-image="venice_sunset_4k.hdr" shadow-softness="1">
+    <button class="Hotspot" slot="hotspot-2" data-position="0.2814105961338417m 0.5003084024655067m 0.2588250611017345m" data-normal="0m 0.3419980891181389m 0.939700647567906m" data-visibility-attribute="visible">
+        <div class="HotspotAnnotation">Sample Door</div>
+    </button><button class="Hotspot" slot="hotspot-4" data-position="-0.4563543498516087m 0.12327390101539326m -0.11624228917428098m" data-normal="-1m 0m 0m" data-visibility-attribute="visible">
+        <div class="HotspotAnnotation">Input/Output</div>
+    </button>
     <div class="progress-bar hide" slot="progress-bar">
         <div class="update-bar"></div>
     </div>

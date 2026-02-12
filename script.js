@@ -11,3 +11,28 @@ const onProgress = (event) => {
   }
 };
 document.querySelector('model-viewer').addEventListener('progress', onProgress);
+
+// Handle loading screen
+const modelViewer = document.querySelector('model-viewer');
+const loadingScreen = document.getElementById('loading-screen');
+
+const hideLoadingScreen = () => {
+  loadingScreen.classList.add('loaded');
+  setTimeout(() => {
+    loadingScreen.style.display = 'none';
+  }, 600);
+};
+
+// If model is already loaded, hide screen immediately
+if (modelViewer.loaded) {
+  hideLoadingScreen();
+} else {
+  // Otherwise wait for load event
+  modelViewer.addEventListener('load', hideLoadingScreen);
+}
+
+// Ensure screen hides if there's an error (so users can see the poster/error state)
+modelViewer.addEventListener('error', (error) => {
+  console.error("Error loading model:", error);
+  hideLoadingScreen();
+});
