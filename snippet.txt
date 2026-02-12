@@ -1,11 +1,8 @@
-<model-viewer src="Mass.glb" ar ar-modes="webxr scene-viewer quick-look" camera-controls tone-mapping="neutral" poster="poster.webp" shadow-intensity="1.1" exposure="0.97" environment-image="aircraft_workshop_01_1k.hdr">
-    <button class="Hotspot" slot="hotspot-1" data-position="-0.020142229021796798m 0.37240317393201117m 0.3216934888166164m" data-normal="0m 0.2183411720069212m 0.9758724981300806m" data-visibility-attribute="visible">
-        <div class="HotspotAnnotation">Screen wow~!</div>
-    </button><button class="Hotspot" slot="hotspot-2" data-position="0.3360629724554234m 0.46087648850017393m 0.25867125844227007m" data-normal="0m 0.34199940724779276m 0.9397001678419338m" data-visibility-attribute="visible">
-        <div class="HotspotAnnotation">Case Door!
-        </div>
-    </button><button class="Hotspot" slot="hotspot-3" data-position="-0.3845237245534341m 0.11598873429937889m -0.18632033048769486m" data-normal="0m -0.9999999999999541m -3.0294627932906245e-7m" data-visibility-attribute="visible">
-        <div class="HotspotAnnotation">IO!</div>
+<model-viewer src="Mass.glb" ar ar-modes="webxr scene-viewer quick-look" camera-controls tone-mapping="neutral" poster="poster.webp" shadow-intensity="0.74" environment-image="venice_sunset_4k.hdr" exposure="1.64" skybox-image="venice_sunset_4k.hdr" shadow-softness="1">
+    <button class="Hotspot" slot="hotspot-2" data-position="0.2814105961338417m 0.5003084024655067m 0.2588250611017345m" data-normal="0m 0.3419980891181389m 0.939700647567906m" data-visibility-attribute="visible">
+        <div class="HotspotAnnotation">Sample Door</div>
+    </button><button class="Hotspot" slot="hotspot-4" data-position="-0.4563543498516087m 0.12327390101539326m -0.11624228917428098m" data-normal="-1m 0m 0m" data-visibility-attribute="visible">
+        <div class="HotspotAnnotation">Input/Output</div>
     </button>
     <div class="progress-bar hide" slot="progress-bar">
         <div class="update-bar"></div>
