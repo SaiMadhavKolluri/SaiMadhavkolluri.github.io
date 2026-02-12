@@ -1,54 +1,27 @@
 <!doctype html>
 <html lang="en">
-
-<head>
-  <title>MASSBOX® - Exum Instruments | 3D Model Viewer</title>
-  <meta charset="utf-8">
-  <meta name="description"
-    content="Explore the MASSBOX® by Exum Instruments in interactive 3D. Rotate, zoom, and view in AR.">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link type="text/css" href="./styles.css" rel="stylesheet" />
-  <link rel="icon" type="image/png" href="exum_logo.png">
-</head>
-
-<body>
-  <!-- Loading Screen Overlay -->
-  <div id="loading-screen">
-    <img src="exum_logo.png" alt="Exum Instruments" class="loading-logo">
-    <div class="loading-spinner"></div>
-    <p class="loading-text">Loading 3D Model...</p>
-  </div>
-
-  <!-- Logo in top-left corner (always visible) -->
-  <div id="site-logo">
-    <img src="exum_logo.png" alt="Exum Instruments">
-  </div>
-
-  <!-- <model-viewer> HTML element -->
-  <model-viewer src="Mass.glb" ar ar-modes="webxr scene-viewer quick-look" camera-controls tone-mapping="neutral"
-    poster="poster.webp" shadow-intensity="0.74" environment-image="ninomaru_teien_2k.hdr" exposure="1.64"
-    skybox-image="ninomaru_teien_2k.hdr" shadow-softness="1">
-    <button class="Hotspot" slot="hotspot-2" data-position="0.2814105961338417m 0.5003084024655067m 0.2588250611017345m"
-      data-normal="0m 0.3419980891181389m 0.939700647567906m" data-visibility-attribute="visible">
-      <div class="HotspotAnnotation">Sample Door</div>
-    </button><button class="Hotspot" slot="hotspot-4"
-      data-position="-0.4563543498516087m 0.12327390101539326m -0.11624228917428098m" data-normal="-1m 0m 0m"
-      data-visibility-attribute="visible">
-      <div class="HotspotAnnotation">Input/Output</div>
-    </button>
-    <div class="progress-bar hide" slot="progress-bar">
-      <div class="update-bar"></div>
-    </div>
-    <button slot="ar-button" id="ar-button">
-      View in your space
-    </button>
-    <div id="ar-prompt">
-      <img src="ar_hand_prompt.png">
-    </div>
-  </model-viewer>
-  <script src="script.js"></script>
-  <!-- Loads <model-viewer> for browsers: -->
-  <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/4.0.0/model-viewer.min.js"></script>
-</body>
-
+  <head>
+    <title>&lt;model-viewer&gt; template</title>
+    <meta charset="utf-8">
+    <meta name="description" content="&lt;model-viewer&gt; template">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link type="text/css" href="./styles.css" rel="stylesheet"/>
+  </head>
+  <body>
+    <!-- <model-viewer> HTML element -->
+    <model-viewer src="Mass.glb" ar ar-modes="webxr scene-viewer quick-look" camera-controls tone-mapping="neutral" poster="poster.webp" shadow-intensity="0.74" environment-image="ninomaru_teien_2k.hdr" exposure="1.64" shadow-softness="1" skybox-image="ninomaru_teien_2k.hdr">
+      <div class="progress-bar hide" slot="progress-bar">
+          <div class="update-bar"></div>
+      </div>
+      <button slot="ar-button" id="ar-button">
+          View in your space
+      </button>
+      <div id="ar-prompt">
+          <img src="ar_hand_prompt.png">
+      </div>
+    </model-viewer>  
+    <script src="script.js"></script>
+    <!-- Loads <model-viewer> for browsers: -->
+    <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/{{MODELVIEWER_VERSION}}/model-viewer.min.js"></script>
+  </body>
 </html>
