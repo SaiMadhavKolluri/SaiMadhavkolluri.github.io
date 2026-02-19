@@ -36,7 +36,7 @@
 
     <!-- Effects: Threshold 0 (Relies 100% on JS selection) -->
     <effect-composer id="selectiveComposer">
-      <selective-bloom-effect strength="1.0" radius="0.15" threshold="0"></selective-bloom-effect>
+
     </effect-composer>
 
     <!-- Dimension Hotspots (hidden by default) -->
@@ -99,8 +99,9 @@
     </div>
   </model-viewer>
 
-  <!-- Controls: Dimension Toggle & Unit Switch -->
+  <!-- Controls: Dimension Toggle, Unit Switch, Bloom Toggle -->
   <div id="dim-controls">
+    <button id="bloom-toggle" title="Toggle LED Glow">✨</button>
     <button id="dim-toggle" title="Show/Hide Dimensions">📐</button>
     <button id="unit-toggle" title="Switch Units" style="display:none;">in → cm</button>
   </div>
@@ -124,29 +125,65 @@
   <!-- Helper Script to Configure Effects & Dimensions -->
   <script type="module">
     const viewer = document.querySelector("model-viewer");
-    // === Selective Bloom Setup (Strict Target: LED.001) ===
+    // === Bloom Logic === 
     const selectiveComposer = document.querySelector("effect-composer#selectiveComposer");
-    const selectiveBloom = selectiveComposer?.querySelector("selective-bloom-effect");
+    let ledTargets = []; // Cache the LED objects
 
-    if (selectiveComposer && selectiveBloom) {
-      // Set MSAA for performance
+    if (selectiveComposer) {
       selectiveComposer.setAttribute('msaa', '4');
 
+      // 1. Find the LED objects when the model loads
       selectiveComposer.addEventListener('updated-selection', () => {
-        const selection = [];
+        ledTargets = [];
         selectiveComposer.selection.forEach((obj) => {
-          // Target by MATERIAL Name (Index 6)
           if (obj.material && obj.material.name === 'LED.001') {
-            selection.push(obj);
-            // Cyan Glow
-            obj.material.emissive.setHex(0x00f2f8);
-            obj.material.emissiveIntensity = 10;
+            ledTargets.push(obj);
+            // Initialize OFF (Dark)
+            obj.material.emissive.setHex(0x000000);
+            obj.material.emissiveIntensity = 0;
           }
         });
-        selectiveBloom.selection = selection;
-        console.log("🌟 Bloom Targets:", selection.map(s => `${s.name} [Mat: ${s.material?.name}]`));
+
+        console.log("🌟 LED Targets Found:", ledTargets.length);
       });
     }
+
+    // === Dynamic Bloom Toggle ===
+    let bloomEnabled = false;
+    const bloomToggle = document.getElementById('bloom-toggle');
+
+    bloomToggle.addEventListener('click', () => {
+      bloomEnabled = !bloomEnabled;
+      bloomToggle.classList.toggle('active', bloomEnabled);
+
+      if (bloomEnabled) {
+        // TURN ON: Set brightness high & Add Glow Effect
+        ledTargets.forEach(obj => {
+          obj.material.emissive.setHex(0x00f2f8); // Cyan
+          obj.material.emissiveIntensity = 10;
+        });
+
+        // Create Bloom Effect dynamically
+        const bloom = document.createElement("selective-bloom-effect");
+        bloom.setAttribute("strength", "1.0");
+        bloom.setAttribute("radius", "0.10");
+        bloom.setAttribute("threshold", "0");
+        selectiveComposer.appendChild(bloom);
+
+        bloom.selection = ledTargets;
+        console.log("✨ Bloom ENABLED");
+      } else {
+        // TURN OFF: Set brightness to 0 & Remove Glow Effect
+        ledTargets.forEach(obj => {
+          obj.material.emissive.setHex(0x000000); // Black
+          obj.material.emissiveIntensity = 0;
+        });
+
+        const bloom = selectiveComposer.querySelector("selective-bloom-effect");
+        if (bloom) bloom.remove();
+        console.log("🌑 Bloom REMOVED");
+      }
+    });
 
 
     // === Dimensions Toggle ===

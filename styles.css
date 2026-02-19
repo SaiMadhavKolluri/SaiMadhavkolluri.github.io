@@ -264,6 +264,39 @@ model-viewer>#ar-prompt>img {
   animation: circle 4s linear infinite;
 }
 
+#dim-controls button {
+  background: rgba(255, 255, 255, 0.9);
+  border: none;
+  border-radius: 50%;
+  width: 44px;
+  height: 44px;
+  font-size: 20px;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+#dim-controls button:hover {
+  transform: scale(1.1);
+  background: white;
+}
+
+#dim-controls button.active {
+  background: #4fc3f7;
+  color: white;
+  box-shadow: 0 0 15px rgba(79, 195, 247, 0.5);
+}
+
+#bloom-toggle.active {
+  background: #ffeb3b;
+  /* Bright Yellow for Glow when active */
+  color: #333;
+  box-shadow: 0 0 15px rgba(255, 235, 59, 0.5);
+}
+
 /* ===== Dimension Hotspots ===== */
 .dim {
   background: transparent;
