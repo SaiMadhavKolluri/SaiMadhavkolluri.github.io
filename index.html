@@ -29,9 +29,60 @@
 
   <!-- <model-viewer> HTML element -->
 
-  <model-viewer src="Mass.glb" ar ar-modes="webxr scene-viewer quick-look" camera-controls tone-mapping="neutral"
-    poster="poster.webp" shadow-intensity="0.74" environment-image="ninomaru_teien_2k.hdr" exposure="1.64"
-    shadow-softness="1" skybox-image="ninomaru_teien_2k.hdr" render-scale="auto">
+  <model-viewer id="massbox" src="Mass.glb" ar ar-modes="webxr scene-viewer quick-look" ar-scale="fixed" camera-controls
+    tone-mapping="Reinhard2 Adaptive" poster="poster.webp" shadow-intensity="1.00" exposure="1.3" shadow-softness="1"
+    render-scale="auto">
+
+
+    <!-- Dimension Hotspots (hidden by default) -->
+    <!-- 
+      Corner Layout (like reference image):
+      Top-Left-Back = where Width and Height meet
+      Bottom-Left-Back = where Height and Depth meet
+      
+      Width (X):  top-left-back  →  top-right-back     (horizontal at top)
+      Height (Y): top-left-back  →  bottom-left-back   (vertical on left)
+      Depth (Z):  bottom-left-back → bottom-left-front  (goes forward at bottom)
+    -->
+
+    <!-- Width: left to right (41.5 in) -->
+    <button class="dim" slot="hotspot-dim-x-1" data-position="-0.455 0.62 -0.35" data-normal="0 0 -1"></button>
+    <button class="dim" slot="hotspot-dim-x-2" data-position="0.553 0.62 -0.35" data-normal="0 0 -1"></button>
+    <span class="dim-label" slot="hotspot-dim-x-label" data-position="0.05 0.62 -0.35" data-normal="0 0 -1"
+      id="dim-width">41.5 in</span>
+
+    <!-- Height: top to bottom (23.2 in) -->
+    <button class="dim" slot="hotspot-dim-y-1" data-position="-0.50 0.577 -0.35" data-normal="0 0 -1"></button>
+    <button class="dim" slot="hotspot-dim-y-2" data-position="-0.50 0.046 -0.35" data-normal="0 0 -1"></button>
+    <span class="dim-label" slot="hotspot-dim-y-label" data-position="-0.50 0.31 -0.35" data-normal="0 0 -1"
+      id="dim-height">23.2 in</span>
+
+    <!-- Depth: back to front (26.8 in) -->
+    <button class="dim" slot="hotspot-dim-z-1" data-position="-0.50 0.02 -0.327" data-normal="-1 0 0"></button>
+    <button class="dim" slot="hotspot-dim-z-2" data-position="-0.50 0.02 0.33" data-normal="-1 0 0"></button>
+    <span class="dim-label" slot="hotspot-dim-z-label" data-position="-0.50 0.02 0.0" data-normal="-1 0 0"
+      id="dim-depth">26.8 in</span>
+
+    <!-- SVG Overlay with Arrows -->
+    <svg id="dim-lines" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg"
+      style="position:absolute;top:0;left:0;pointer-events:none;z-index:10;display:none;">
+      <defs>
+        <marker id="arrow" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="5" markerHeight="5"
+          orient="auto-start-reverse">
+          <path d="M 0 0 L 10 5 L 0 10 z" fill="#4fc3f7" />
+        </marker>
+        <marker id="dot" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="5" markerHeight="5">
+          <circle cx="5" cy="5" r="5" fill="#4fc3f7" />
+        </marker>
+      </defs>
+      <line id="line-x" stroke="#4fc3f7" stroke-width="2" stroke-dasharray="2 6" stroke-linecap="round"
+        marker-start="url(#dot)" marker-end="url(#dot)" />
+      <line id="line-y" stroke="#4fc3f7" stroke-width="2" stroke-dasharray="2 6" stroke-linecap="round"
+        marker-start="url(#dot)" marker-end="url(#dot)" />
+      <line id="line-z" stroke="#4fc3f7" stroke-width="2" stroke-dasharray="2 6" stroke-linecap="round"
+        marker-start="url(#dot)" marker-end="url(#dot)" />
+    </svg>
+
     <div class="progress-bar hide" slot="progress-bar">
       <div class="update-bar"></div>
     </div>
@@ -42,9 +93,187 @@
       <img src="ar_hand_prompt.png">
     </div>
   </model-viewer>
+
+  <!-- Controls: Dimension Toggle & Unit Switch -->
+  <div id="dim-controls">
+    <button id="dim-toggle" title="Show/Hide Dimensions">📐</button>
+    <button id="unit-toggle" title="Switch Units" style="display:none;">in → cm</button>
+  </div>
+
   <script src="script.js"></script>
-  <!-- Loads <model-viewer> for browsers: -->
+
+  <!-- Import Map for Three.js and Effects -->
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+        "three/": "https://cdn.jsdelivr.net/npm/three@0.160.0/"
+      }
+    }
+  </script>
+  <!-- Load model-viewer (module version) and effects -->
   <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.4.0/model-viewer.min.js"></script>
+  <script type="module"
+    src="https://cdn.jsdelivr.net/npm/@google/model-viewer-effects@1.0.0/dist/model-viewer-effects.min.js"></script>
+
+  <!-- Helper Script to Configure Effects & Dimensions -->
+  <script type="module">
+    const viewer = document.querySelector("model-viewer");
+    // The <effect-composer> element is not directly in the HTML, but is part of the model-viewer-effects library.
+    // To change its msaa property, we need to query it after it's potentially rendered or created.
+    // Assuming it's a direct child or can be queried by its ID.
+    const selectiveComposer = document.querySelector("effect-composer#selectiveComposer");
+    if (selectiveComposer) {
+      selectiveComposer.setAttribute('msaa', '4'); // Set msaa to 4
+    }
+    const selectiveBloom = selectiveComposer?.querySelector("selective-bloom-effect");
+
+    // === Selective Bloom Setup ===
+    if (selectiveComposer) {
+      selectiveComposer.addEventListener('updated-selection', () => {
+        const selection = [];
+        selectiveComposer.selection.forEach((obj) => {
+          if (obj.name === 'Mesh079_6') {
+            selection.push(obj);
+            if (obj.material) {
+              obj.material.emissive.setHex(0x00f2f8);
+              obj.material.emissiveIntensity = 6;
+            }
+          }
+        });
+        selectiveBloom.selection = selection;
+      });
+    }
+
+    // === Dimensions Toggle ===
+    const dims = {
+      width: { in: 41.5, cm: 105.4 },
+      height: { in: 23.2, cm: 58.9 },
+      depth: { in: 26.8, cm: 68.1 }
+    };
+
+    let showDims = false;
+    let useMetric = false;
+
+    const dimToggle = document.getElementById('dim-toggle');
+    const unitToggle = document.getElementById('unit-toggle');
+    const dimElements = document.querySelectorAll('.dim, .dim-label');
+
+    // Toggle dimensions visibility
+    const dimSvg = document.getElementById('dim-lines');
+    dimToggle.addEventListener('click', () => {
+      showDims = !showDims;
+      dimElements.forEach(el => el.classList.toggle('show', showDims));
+      unitToggle.style.display = showDims ? 'block' : 'none';
+      dimToggle.classList.toggle('active', showDims);
+      dimSvg.style.display = showDims ? 'block' : 'none';
+      if (showDims) updateDimLines();
+    });
+
+    // Toggle units (in <-> cm)
+    unitToggle.addEventListener('click', () => {
+      useMetric = !useMetric;
+      const unit = useMetric ? 'cm' : 'in';
+      unitToggle.textContent = useMetric ? 'cm → in' : 'in → cm';
+
+      document.getElementById('dim-width').textContent = dims.width[unit] + ' ' + unit;
+      document.getElementById('dim-height').textContent = dims.height[unit] + ' ' + unit;
+      document.getElementById('dim-depth').textContent = dims.depth[unit] + ' ' + unit;
+    });
+
+    // === Draw blue dotted lines between dimension hotspot pairs ===
+    function updateDimLines() {
+      if (!showDims) return;
+      const rect = viewer.getBoundingClientRect();
+
+      // Helper: get screen position of a hotspot
+      function getPos(slotName) {
+        const el = viewer.querySelector(`[slot="${slotName}"]`);
+        if (!el) return null;
+        const elRect = el.getBoundingClientRect();
+        return {
+          x: elRect.left + elRect.width / 2 - rect.left,
+          y: elRect.top + elRect.height / 2 - rect.top
+        };
+      }
+
+      // Width line (x)
+      const x1 = getPos('hotspot-dim-x-1');
+      const x2 = getPos('hotspot-dim-x-2');
+      if (x1 && x2) {
+        const lineX = document.getElementById('line-x');
+        lineX.setAttribute('x1', x1.x); lineX.setAttribute('y1', x1.y);
+        lineX.setAttribute('x2', x2.x); lineX.setAttribute('y2', x2.y);
+      }
+
+      // Height line (y)
+      const y1 = getPos('hotspot-dim-y-1');
+      const y2 = getPos('hotspot-dim-y-2');
+      if (y1 && y2) {
+        const lineY = document.getElementById('line-y');
+        lineY.setAttribute('x1', y1.x); lineY.setAttribute('y1', y1.y);
+        lineY.setAttribute('x2', y2.x); lineY.setAttribute('y2', y2.y);
+      }
+
+      // Depth line (z)
+      const z1 = getPos('hotspot-dim-z-1');
+      const z2 = getPos('hotspot-dim-z-2');
+      if (z1 && z2) {
+        const lineZ = document.getElementById('line-z');
+        lineZ.setAttribute('x1', z1.x); lineZ.setAttribute('y1', z1.y);
+        lineZ.setAttribute('x2', z2.x); lineZ.setAttribute('y2', z2.y);
+      }
+
+      requestAnimationFrame(updateDimLines);
+    }
+
+    // Start updating lines when camera moves
+    viewer.addEventListener('camera-change', () => {
+      if (showDims) updateDimLines();
+    });
+
+    // === Canvas Video Texture (Reliable Orientation Fix) ===
+    viewer.addEventListener('load', () => {
+      const video = document.createElement('video');
+      video.src = 'vid.mp4';
+      video.loop = true;
+      video.muted = true;
+      video.playsInline = true;
+      video.autoplay = true;
+      video.play();
+
+      const canvasTexture = viewer.createCanvasTexture();
+      const canvas = canvasTexture.source.element;
+      canvas.width = 1024;
+      canvas.height = 512;
+      const ctx = canvas.getContext('2d');
+
+      function drawFrame() {
+        if (!video.paused && !video.ended) {
+          ctx.save();
+          // Flip Vertically to fix inverted UVs
+          ctx.scale(1, -1);
+          ctx.drawImage(video, 0, -canvas.height, canvas.width, canvas.height);
+          ctx.restore();
+          canvasTexture.source.update();
+        }
+        requestAnimationFrame(drawFrame);
+      }
+
+      video.addEventListener('playing', () => {
+        drawFrame();
+        const screenMaterial = viewer.model.materials.find(m => m.name === 'Material.002') || viewer.model.materials[11];
+        if (screenMaterial) {
+          screenMaterial.pbrMetallicRoughness.baseColorTexture.setTexture(canvasTexture);
+          if (screenMaterial.emissiveTexture) screenMaterial.emissiveTexture.setTexture(canvasTexture);
+          screenMaterial.setEmissiveFactor([1, 1, 1]);
+          screenMaterial.pbrMetallicRoughness.setRoughnessFactor(1);
+          screenMaterial.pbrMetallicRoughness.setMetallicFactor(0);
+          console.log(`🎬 Canvas video applied to: "${screenMaterial.name}"`);
+        }
+      });
+    });
+  </script>
 </body>
 
 </html>
