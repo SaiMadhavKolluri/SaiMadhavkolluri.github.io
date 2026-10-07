@@ -1,0 +1,8 @@
+# Binary assets: never touch line endings.
+*.hdr binary
+*.glb binary
+*.usdz binary
+*.mp4 binary
+*.webp binary
+*.jpg binary
+*.png binary

@@ -1,345 +1,141 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 
 <head>
-  <title>MASSBOX® - Exum Instruments | 3D Model Viewer</title>
   <meta charset="utf-8">
+  <script>
+    // Apply the saved theme before first paint to avoid a flash.
+    try { document.documentElement.dataset.theme = localStorage.getItem('theme') || 'dark'; } catch (e) { }
+
+    // model-viewer renders at window.devicePixelRatio. Pin it to 2 before model-viewer loads:
+    // 1x screens get 2x supersampling (smooth edges on top of MSAA), 3x phones render
+    // 2.25x fewer pixels (steadier 60 fps, still smooth with MSAA).
+    try { Object.defineProperty(window, 'devicePixelRatio', { get: () => 2, configurable: true }); } catch (e) { }
+  </script>
+  <title>MASSBOX® - Exum Instruments | 3D Model Viewer</title>
   <meta name="description"
     content="Explore the MASSBOX® by Exum Instruments in interactive 3D. Rotate, zoom, and view in AR.">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#0b0c0e">
+  <meta property="og:title" content="MASSBOX® by Exum Instruments">
+  <meta property="og:description" content="Explore the MASSBOX® in interactive 3D. Rotate, zoom, and view it in your space.">
+  <meta property="og:image" content="https://saimadhavkolluri.github.io/og-image.jpg">
+  <meta property="og:type" content="website">
+  <meta name="twitter:card" content="summary_large_image">
   <link type="text/css" href="./styles.css" rel="stylesheet" />
   <link rel="icon" type="image/png" href="exum_logo.png">
 </head>
 
 <body>
 
-  <!-- Loading Screen Overlay -->
+  <!-- Loading screen -->
   <div id="loading-screen">
     <img src="exum_logo.png" alt="Exum Instruments" class="loading-logo">
-    <div class="loading-spinner"></div>
-    <p class="loading-text">Loading 3D Model...</p>
+    <div class="loading-track"><div class="loading-fill"></div></div>
+    <p class="loading-text">Loading 3D model</p>
   </div>
 
-  <!-- Logo in top-left corner (always visible) -->
-  <div id="site-logo">
-    <img src="exum_logo.png" alt="Exum Instruments">
-  </div>
+  <!-- Header -->
+  <header id="site-header">
+    <img class="exum" src="exum_logo.png" alt="Exum Instruments">
+    <span class="divider"></span>
+    <img class="product" src="massbox_logo.png" alt="MASSBOX®">
+  </header>
 
+  <model-viewer id="massbox" src="Mass.glb" ios-src="Mass.usdz" poster="poster.webp" alt="MASSBOX® benchtop mass spectrometer"
+    ar ar-modes="webxr scene-viewer quick-look" ar-scale="fixed" ar-placement="floor"
+    camera-controls auto-rotate
+    camera-orbit="30deg 75deg 105%" max-camera-orbit="auto 95deg auto"
+    environment-image="studio_dark.hdr" tone-mapping="neutral" exposure="1.0" shadow-intensity="1" shadow-softness="1">
 
+    <!-- Dimension endpoints (metres). Model is centred on X/Z with its base at Y=0:
+         X ±0.528, Y 0..0.588, Z ±0.354. Lines sit 3.5 cm outside the front-left-bottom corner. -->
+    <div class="dim-point" slot="hotspot-dim-x-1" data-position="-0.528 0 0.389" data-normal="0 0 1"></div>
+    <div class="dim-point" slot="hotspot-dim-x-2" data-position="0.528 0 0.389" data-normal="0 0 1"></div>
+    <div class="dim-point" slot="hotspot-dim-y-1" data-position="-0.563 0 0.389" data-normal="-0.707 0 0.707"></div>
+    <div class="dim-point" slot="hotspot-dim-y-2" data-position="-0.563 0.588 0.389" data-normal="-0.707 0 0.707"></div>
+    <div class="dim-point" slot="hotspot-dim-z-1" data-position="0.563 0 -0.354" data-normal="1 0 0"></div>
+    <div class="dim-point" slot="hotspot-dim-z-2" data-position="0.563 0 0.354" data-normal="1 0 0"></div>
 
-  <!-- <model-viewer> HTML element -->
-
-  <model-viewer id="massbox" src="Mass.glb" ar ar-modes="webxr scene-viewer quick-look" ar-scale="fixed" camera-controls
-    auto-rotate touch-action="pan-y" ar-placement="floor" tone-mapping="neutral" poster="poster.webp"
-    shadow-intensity="1.00" exposure="1.3" shadow-softness="1" render-scale="auto">
-
-
-    <!-- Effects: Threshold 0 (Relies 100% on JS selection) -->
-    <effect-composer id="selectiveComposer">
-
-    </effect-composer>
-
-    <!-- Dimension Hotspots (hidden by default) -->
-    <!-- 
-      Corner Layout (like reference image):
-      Top-Left-Back = where Width and Height meet
-      Bottom-Left-Back = where Height and Depth meet
-      
-      Width (X):  top-left-back  →  top-right-back     (horizontal at top)
-      Height (Y): top-left-back  →  bottom-left-back   (vertical on left)
-      Depth (Z):  bottom-left-back → bottom-left-front  (goes forward at bottom)
-    -->
-
-    <!-- Width: left to right (41.5 in) -->
-    <button class="dim" slot="hotspot-dim-x-1" data-position="-0.455 0.62 -0.35" data-normal="0 0 -1"></button>
-    <button class="dim" slot="hotspot-dim-x-2" data-position="0.553 0.62 -0.35" data-normal="0 0 -1"></button>
-    <span class="dim-label" slot="hotspot-dim-x-label" data-position="0.05 0.62 -0.35" data-normal="0 0 -1"
-      id="dim-width">41.5 in</span>
-
-    <!-- Height: top to bottom (23.2 in) -->
-    <button class="dim" slot="hotspot-dim-y-1" data-position="-0.50 0.577 -0.35" data-normal="0 0 -1"></button>
-    <button class="dim" slot="hotspot-dim-y-2" data-position="-0.50 0.046 -0.35" data-normal="0 0 -1"></button>
-    <span class="dim-label" slot="hotspot-dim-y-label" data-position="-0.50 0.31 -0.35" data-normal="0 0 -1"
-      id="dim-height">23.2 in</span>
-
-    <!-- Depth: back to front (26.8 in) -->
-    <button class="dim" slot="hotspot-dim-z-1" data-position="-0.50 0.02 -0.327" data-normal="-1 0 0"></button>
-    <button class="dim" slot="hotspot-dim-z-2" data-position="-0.50 0.02 0.33" data-normal="-1 0 0"></button>
-    <span class="dim-label" slot="hotspot-dim-z-label" data-position="-0.50 0.02 0.0" data-normal="-1 0 0"
-      id="dim-depth">26.8 in</span>
-
-    <!-- SVG Overlay with Arrows -->
-    <svg id="dim-lines" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg"
-      style="position:absolute;top:0;left:0;pointer-events:none;z-index:10;display:none;">
-      <defs>
-        <marker id="arrow" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="5" markerHeight="5"
-          orient="auto-start-reverse">
-          <path d="M 0 0 L 10 5 L 0 10 z" fill="#4fc3f7" />
-        </marker>
-        <marker id="dot" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="5" markerHeight="5">
-          <circle cx="5" cy="5" r="5" fill="#4fc3f7" />
-        </marker>
-      </defs>
-      <line id="line-x" stroke="#4fc3f7" stroke-width="2" stroke-dasharray="2 6" stroke-linecap="round"
-        marker-start="url(#dot)" marker-end="url(#dot)" />
-      <line id="line-y" stroke="#4fc3f7" stroke-width="2" stroke-dasharray="2 6" stroke-linecap="round"
-        marker-start="url(#dot)" marker-end="url(#dot)" />
-      <line id="line-z" stroke="#4fc3f7" stroke-width="2" stroke-dasharray="2 6" stroke-linecap="round"
-        marker-start="url(#dot)" marker-end="url(#dot)" />
-    </svg>
-
-    <div class="progress-bar hide" slot="progress-bar">
-      <div class="update-bar"></div>
+    <div id="dim-overlay" aria-hidden="true">
+      <svg xmlns="http://www.w3.org/2000/svg">
+        <g id="dim-x" class="dim-axis"><line class="dim-line" /><line class="dim-tick" /><line class="dim-tick" /></g>
+        <g id="dim-y" class="dim-axis"><line class="dim-line" /><line class="dim-tick" /><line class="dim-tick" /></g>
+        <g id="dim-z" class="dim-axis"><line class="dim-line" /><line class="dim-tick" /><line class="dim-tick" /></g>
+      </svg>
+      <span class="dim-label" id="dim-width" data-axis="x">41.5 in</span>
+      <span class="dim-label" id="dim-height" data-axis="y">23.2 in</span>
+      <span class="dim-label" id="dim-depth" data-axis="z">26.8 in</span>
     </div>
+
+    <!-- Empty slot hides model-viewer's default bar; the loading screen shows progress. -->
+    <div slot="progress-bar"></div>
+
     <button slot="ar-button" id="ar-button">
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z" />
+        <path d="m3.3 7 8.7 5 8.7-5" /><path d="M12 22V12" />
+      </svg>
       View in your space
     </button>
     <div id="ar-prompt">
-      <img src="ar_hand_prompt.png">
+      <img src="ar_hand_prompt.png" alt="">
     </div>
   </model-viewer>
 
-  <!-- Controls: Dimension Toggle, Unit Switch, Bloom Toggle, Share -->
-  <div id="dim-controls">
-    <button id="share-btn" title="Share this Model">🔗</button>
-    <button id="bloom-toggle" title="Toggle LED Glow">✨</button>
-    <button id="dim-toggle" title="Show/Hide Dimensions">📐</button>
-    <button id="unit-toggle" title="Switch Units" style="display:none;">in → cm</button>
-  </div>
+  <!-- Toolbar -->
+  <nav id="toolbar" aria-label="Viewer controls">
+    <button id="share-btn" class="tool" aria-label="Share" data-tip="Share">
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8" /><path d="M16 6l-4-4-4 4" /><path d="M12 2v13" />
+      </svg>
+    </button>
+    <div class="tool-wrap">
+      <div id="unit-toggle" role="group" aria-label="Units">
+        <button data-unit="in" class="active" aria-pressed="true">in</button>
+        <button data-unit="cm" aria-pressed="false">cm</button>
+      </div>
+      <button id="dim-toggle" class="tool" aria-label="Dimensions" aria-pressed="false" data-tip="Dimensions">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M21.3 15.3a2.4 2.4 0 0 1 0 3.4l-2.6 2.6a2.4 2.4 0 0 1-3.4 0L2.7 8.7a2.41 2.41 0 0 1 0-3.4l2.6-2.6a2.41 2.41 0 0 1 3.4 0Z" />
+          <path d="m14.5 12.5 2-2" /><path d="m11.5 9.5 2-2" /><path d="m8.5 6.5 2-2" /><path d="m17.5 15.5 2-2" />
+        </svg>
+      </button>
+    </div>
+    <button id="banana-btn" class="tool" aria-label="Banana for scale" aria-pressed="false" data-tip="Banana for scale">
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M4 13c3.5-2 8-2 10 2a5.5 5.5 0 0 1 8 5" />
+        <path d="M5.15 17.89c5.52-1.52 8.65-6.89 7-12C11.55 4 11.5 2 13 2c3.22 0 5 5.5 5 8 0 6.5-4.2 12-10.49 12C5.11 22 2 22 2 20c0-1.5 1.14-1.55 3.15-2.11Z" />
+      </svg>
+    </button>
+    <span class="tool-sep"></span>
+    <button id="rotate-btn" class="tool" aria-label="Auto-rotate" aria-pressed="true" data-tip="Stop rotation">
+      <svg class="icon-pause" viewBox="0 0 24 24" aria-hidden="true">
+        <rect x="6" y="5" width="4" height="14" rx="1" /><rect x="14" y="5" width="4" height="14" rx="1" />
+      </svg>
+      <svg class="icon-play" viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M7 4.5v15l12-7.5z" />
+      </svg>
+    </button>
+    <button id="theme-btn" class="tool" aria-label="Switch theme" data-tip="Light mode">
+      <svg class="icon-sun" viewBox="0 0 24 24" aria-hidden="true">
+        <circle cx="12" cy="12" r="4" /><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41" />
+      </svg>
+      <svg class="icon-moon" viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z" />
+      </svg>
+    </button>
+    <button id="reset-btn" class="tool" aria-label="Reset view" data-tip="Reset view">
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" /><path d="M3 3v5h5" />
+      </svg>
+    </button>
+  </nav>
 
-  <script src="script.js"></script>
+  <div id="toast" role="status" aria-live="polite"></div>
 
-  <!-- Import Map for Three.js and Effects -->
-  <script type="importmap">
-    {
-      "imports": {
-        "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
-        "three/": "https://cdn.jsdelivr.net/npm/three@0.160.0/"
-      }
-    }
-  </script>
-  <!-- Load model-viewer (module version) and effects -->
   <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.4.0/model-viewer.min.js"></script>
-  <script type="module"
-    src="https://cdn.jsdelivr.net/npm/@google/model-viewer-effects@1.0.0/dist/model-viewer-effects.min.js"></script>
-
-  <!-- Helper Script to Configure Effects & Dimensions -->
-  <script type="module">
-    const viewer = document.querySelector("model-viewer");
-    // === Bloom Logic === 
-    const selectiveComposer = document.querySelector("effect-composer#selectiveComposer");
-    let ledTargets = []; // Cache the LED objects
-
-    if (selectiveComposer) {
-      selectiveComposer.setAttribute('msaa', '4');
-
-      // 1. Find the LED objects when the model loads
-      selectiveComposer.addEventListener('updated-selection', () => {
-        ledTargets = [];
-        selectiveComposer.selection.forEach((obj) => {
-          if (obj.material && obj.material.name === 'LED.001') {
-            ledTargets.push(obj);
-            // Initialize OFF (Dark)
-            obj.material.emissive.setHex(0x000000);
-            obj.material.emissiveIntensity = 0;
-          }
-        });
-
-        console.log("🌟 LED Targets Found:", ledTargets.length);
-      });
-    }
-
-    // === Dynamic Bloom Toggle ===
-    let bloomEnabled = false;
-    const bloomToggle = document.getElementById('bloom-toggle');
-
-    bloomToggle.addEventListener('click', () => {
-      bloomEnabled = !bloomEnabled;
-      bloomToggle.classList.toggle('active', bloomEnabled);
-
-      if (bloomEnabled) {
-        // TURN ON: Set brightness high & Add Glow Effect
-        ledTargets.forEach(obj => {
-          obj.material.emissive.setHex(0x00f2f8); // Cyan
-          obj.material.emissiveIntensity = 10;
-        });
-
-        // Create Bloom Effect dynamically
-        const bloom = document.createElement("selective-bloom-effect");
-        bloom.setAttribute("strength", "1.0");
-        bloom.setAttribute("radius", "0.10");
-        bloom.setAttribute("threshold", "0");
-        selectiveComposer.appendChild(bloom);
-
-        bloom.selection = ledTargets;
-        console.log("✨ Bloom ENABLED");
-      } else {
-        // TURN OFF: Set brightness to 0 & Remove Glow Effect
-        ledTargets.forEach(obj => {
-          obj.material.emissive.setHex(0x000000); // Black
-          obj.material.emissiveIntensity = 0;
-        });
-
-        const bloom = selectiveComposer.querySelector("selective-bloom-effect");
-        if (bloom) bloom.remove();
-        console.log("🌑 Bloom REMOVED");
-      }
-    });
-
-
-    // === Share Functionality ===
-    const shareBtn = document.getElementById('share-btn');
-    shareBtn.addEventListener('click', async () => {
-      const shareData = {
-        title: 'Massbox 3D',
-        text: 'Check out the Massbox in 3D!',
-        url: window.location.href,
-      };
-
-      try {
-        if (navigator.share) {
-          await navigator.share(shareData);
-        } else {
-          // Fallback: Copy to Clipboard
-          await navigator.clipboard.writeText(window.location.href);
-          const originalText = shareBtn.textContent;
-          shareBtn.textContent = "Copied!";
-          setTimeout(() => shareBtn.textContent = originalText, 2000);
-        }
-      } catch (err) {
-        console.error('Error sharing:', err);
-      }
-    });
-
-    // === Dimensions Toggle ===
-    const dims = {
-      width: { in: 41.5, cm: 105.4 },
-      height: { in: 23.2, cm: 58.9 },
-      depth: { in: 26.8, cm: 68.1 }
-    };
-
-    let showDims = false;
-    let useMetric = false;
-
-    const dimToggle = document.getElementById('dim-toggle');
-    const unitToggle = document.getElementById('unit-toggle');
-    const dimElements = document.querySelectorAll('.dim, .dim-label');
-
-    // Toggle dimensions visibility
-    const dimSvg = document.getElementById('dim-lines');
-    dimToggle.addEventListener('click', () => {
-      showDims = !showDims;
-      dimElements.forEach(el => el.classList.toggle('show', showDims));
-      unitToggle.style.display = showDims ? 'block' : 'none';
-      dimToggle.classList.toggle('active', showDims);
-      dimSvg.style.display = showDims ? 'block' : 'none';
-      if (showDims) updateDimLines();
-    });
-
-    // Toggle units (in <-> cm)
-    unitToggle.addEventListener('click', () => {
-      useMetric = !useMetric;
-      const unit = useMetric ? 'cm' : 'in';
-      unitToggle.textContent = useMetric ? 'cm → in' : 'in → cm';
-
-      document.getElementById('dim-width').textContent = dims.width[unit] + ' ' + unit;
-      document.getElementById('dim-height').textContent = dims.height[unit] + ' ' + unit;
-      document.getElementById('dim-depth').textContent = dims.depth[unit] + ' ' + unit;
-    });
-
-    // === Draw blue dotted lines between dimension hotspot pairs ===
-    function updateDimLines() {
-      if (!showDims) return;
-      const rect = viewer.getBoundingClientRect();
-
-      // Helper: get screen position of a hotspot
-      function getPos(slotName) {
-        const el = viewer.querySelector(`[slot="${slotName}"]`);
-        if (!el) return null;
-        const elRect = el.getBoundingClientRect();
-        return {
-          x: elRect.left + elRect.width / 2 - rect.left,
-          y: elRect.top + elRect.height / 2 - rect.top
-        };
-      }
-
-      // Width line (x)
-      const x1 = getPos('hotspot-dim-x-1');
-      const x2 = getPos('hotspot-dim-x-2');
-      if (x1 && x2) {
-        const lineX = document.getElementById('line-x');
-        lineX.setAttribute('x1', x1.x); lineX.setAttribute('y1', x1.y);
-        lineX.setAttribute('x2', x2.x); lineX.setAttribute('y2', x2.y);
-      }
-
-      // Height line (y)
-      const y1 = getPos('hotspot-dim-y-1');
-      const y2 = getPos('hotspot-dim-y-2');
-      if (y1 && y2) {
-        const lineY = document.getElementById('line-y');
-        lineY.setAttribute('x1', y1.x); lineY.setAttribute('y1', y1.y);
-        lineY.setAttribute('x2', y2.x); lineY.setAttribute('y2', y2.y);
-      }
-
-      // Depth line (z)
-      const z1 = getPos('hotspot-dim-z-1');
-      const z2 = getPos('hotspot-dim-z-2');
-      if (z1 && z2) {
-        const lineZ = document.getElementById('line-z');
-        lineZ.setAttribute('x1', z1.x); lineZ.setAttribute('y1', z1.y);
-        lineZ.setAttribute('x2', z2.x); lineZ.setAttribute('y2', z2.y);
-      }
-
-      requestAnimationFrame(updateDimLines);
-    }
-
-    // Start updating lines when camera moves
-    viewer.addEventListener('camera-change', () => {
-      if (showDims) updateDimLines();
-    });
-
-    // === Canvas Video Texture (Reliable Orientation Fix) ===
-    viewer.addEventListener('load', () => {
-      const video = document.createElement('video');
-      video.src = 'vid.mp4';
-      video.loop = true;
-      video.muted = true;
-      video.playsInline = true;
-      video.autoplay = true;
-      video.play();
-
-      const canvasTexture = viewer.createCanvasTexture();
-      const canvas = canvasTexture.source.element;
-      canvas.width = 1024;
-      canvas.height = 512;
-      const ctx = canvas.getContext('2d');
-
-      function drawFrame() {
-        if (!video.paused && !video.ended) {
-          ctx.save();
-          // Flip Vertically to fix inverted UVs
-          ctx.scale(1, -1);
-          ctx.drawImage(video, 0, -canvas.height, canvas.width, canvas.height);
-          ctx.restore();
-          canvasTexture.source.update();
-        }
-        requestAnimationFrame(drawFrame);
-      }
-
-      video.addEventListener('playing', () => {
-        drawFrame();
-        const screenMaterial = viewer.model.materials.find(m => m.name === 'Material.002') || viewer.model.materials[11];
-        if (screenMaterial) {
-          screenMaterial.pbrMetallicRoughness.baseColorTexture.setTexture(canvasTexture);
-          if (screenMaterial.emissiveTexture) screenMaterial.emissiveTexture.setTexture(canvasTexture);
-          screenMaterial.setEmissiveFactor([1, 1, 1]);
-          screenMaterial.pbrMetallicRoughness.setRoughnessFactor(1);
-          screenMaterial.pbrMetallicRoughness.setMetallicFactor(0);
-          console.log(`🎬 Canvas video applied to: "${screenMaterial.name}"`);
-        }
-      });
-    });
-  </script>
+  <script type="module" src="script.js"></script>
 </body>
 
 </html>
