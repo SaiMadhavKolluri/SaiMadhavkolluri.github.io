@@ -257,65 +257,40 @@ function dimLoop() {
 }
 
 // === Video on the screen ===
-// iOS Safari needs: muted + playsinline as attributes, the element attached to the
-// document, and a user gesture fallback when autoplay is blocked (Low Power Mode).
+// The video streams straight into a WebGL texture (createVideoTexture): no per-frame copy
+// through a 2D canvas, which is slow in Safari. iOS Safari still needs muted + playsinline as
+// attributes, the element attached to the document, and a tap fallback when autoplay is blocked.
 viewer.addEventListener('load', () => {
   const screen = viewer.model.materials.find((m) => m.name === 'screen');
-  if (!screen) return;
+  if (!screen?.emissiveTexture) return;
 
-  const video = document.createElement('video');
-  video.muted = true;
-  video.loop = true;
-  video.playsInline = true;
+  const videoTexture = viewer.createVideoTexture('vid.mp4');
+  const video = videoTexture.source.element;
   video.preload = 'auto';
   video.setAttribute('muted', '');
   video.setAttribute('playsinline', '');
   video.setAttribute('webkit-playsinline', '');
   video.style.cssText = 'position:fixed;left:0;top:0;width:1px;height:1px;opacity:0;pointer-events:none;';
-  video.src = 'vid.mp4';
   document.body.appendChild(video);
 
-  const canvasTexture = viewer.createCanvasTexture();
-  const canvas = canvasTexture.source.element;
-  canvas.width = 1024;
-  canvas.height = 576;
-  const ctx = canvas.getContext('2d');
-  // Canvas textures upload flipped relative to glTF UVs; draw upside down to compensate.
-  ctx.setTransform(1, 0, 0, -1, 0, canvas.height);
-  let applied = false;
-
-  const drawFrame = () => {
-    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-    canvasTexture.source.update();
-    if (!applied) {
-      // Swap in only after the first real frame, so the still image shows until then.
-      applied = true;
-      // A display only emits light: show the video through emissive alone. Using it as base
-      // colour too lets the studio lighting add on top and washes the picture out.
-      screen.emissiveTexture?.setTexture(canvasTexture);
-      screen.setEmissiveFactor([1, 1, 1]);
-      screen.pbrMetallicRoughness.setBaseColorFactor([0, 0, 0, 1]);
-      screen.pbrMetallicRoughness.setRoughnessFactor(1);
-      screen.pbrMetallicRoughness.setMetallicFactor(0);
-    }
+  // Swap in only once a real frame exists, so the still image shows until then.
+  const apply = () => {
+    // A display only emits light: show the video through emissive alone. Using it as base
+    // colour too lets the studio lighting add on top and washes the picture out.
+    screen.emissiveTexture.setTexture(videoTexture);
+    // Video textures upload flipped relative to glTF UVs: flip V back.
+    const { sampler } = screen.emissiveTexture.texture;
+    sampler.setScale({ u: 1, v: -1 });
+    sampler.setOffset({ u: 0, v: 1 });
+    screen.setEmissiveFactor([1, 1, 1]);
+    screen.pbrMetallicRoughness.setBaseColorFactor([0, 0, 0, 1]);
+    screen.pbrMetallicRoughness.setRoughnessFactor(1);
+    screen.pbrMetallicRoughness.setMetallicFactor(0);
   };
-
-  if ('requestVideoFrameCallback' in HTMLVideoElement.prototype) {
-    const onFrame = () => {
-      drawFrame();
-      video.requestVideoFrameCallback(onFrame);
-    };
-    video.requestVideoFrameCallback(onFrame);
+  if ('requestVideoFrameCallback' in video) {
+    video.requestVideoFrameCallback(apply);
   } else {
-    let lastTime = -1;
-    const tick = () => {
-      if (video.readyState >= 2 && video.currentTime !== lastTime) {
-        lastTime = video.currentTime;
-        drawFrame();
-      }
-      requestAnimationFrame(tick);
-    };
-    tick();
+    video.addEventListener('playing', apply, { once: true });
   }
 
   // If the browser blocks playback, try again on the next tap (a user gesture is allowed).

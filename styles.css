@@ -8,7 +8,7 @@
   --track: rgba(0, 0, 0, 0.08);
   --logo-filter: none;
   --wordmark-filter: brightness(0.12);
-  --glass: rgba(18, 20, 24, 0.74);
+  --glass: rgba(18, 20, 24, 0.86);
   --glass-line: rgba(255, 255, 255, 0.08);
   --icon: rgba(255, 255, 255, 0.78);
   --cyan: #00d2e6;
@@ -27,7 +27,7 @@
   --track: rgba(255, 255, 255, 0.1);
   --logo-filter: invert(1) hue-rotate(180deg) brightness(1.15);
   --wordmark-filter: none;
-  --glass: rgba(34, 37, 43, 0.66);
+  --glass: rgba(30, 33, 38, 0.86);
   --glass-line: rgba(255, 255, 255, 0.1);
   --dim: #2fe3f2;
 }
@@ -150,9 +150,8 @@ model-viewer {
 #unit-toggle,
 #toast,
 .dim-label {
+  /* Solid tint, no backdrop blur: blurring the live 3D canvas every frame costs a lot on iPhone. */
   background: var(--glass);
-  -webkit-backdrop-filter: blur(14px) saturate(140%);
-  backdrop-filter: blur(14px) saturate(140%);
   border: 1px solid var(--glass-line);
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.16);
 }
