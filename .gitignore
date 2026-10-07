@@ -1,0 +1,20 @@
+# Local tooling
+.claude/
+.playwright-mcp/
+node_modules/
+
+# OS and editor files
+.DS_Store
+Thumbs.db
+desktop.ini
+.vscode/
+.idea/
+*.swp
+
+# Blender sources and autosaves stay out of the Pages repo (the site only needs the exports)
+*.blend
+*.blend1
+*.blend@
+
+# Logs
+*.log

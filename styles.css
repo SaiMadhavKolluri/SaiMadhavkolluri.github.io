@@ -37,6 +37,11 @@
   display: none;
 }
 
+/* `hidden` must win over component display rules (e.g. the card's grid buttons). */
+[hidden] {
+  display: none !important;
+}
+
 html,
 body {
   margin: 0;
@@ -147,8 +152,11 @@ model-viewer {
 /* ===== Glass surfaces ===== */
 #toolbar,
 #ar-button,
+#qr-btn,
 #unit-toggle,
 #toast,
+#story,
+#qr-dialog,
 .dim-label {
   /* Solid tint, no backdrop blur: blurring the live 3D canvas every frame costs a lot on iPhone. */
   background: var(--glass);
@@ -215,8 +223,8 @@ model-viewer {
 
 :root[data-theme="dark"] #theme-btn .icon-moon,
 :root:not([data-theme="dark"]) #theme-btn .icon-sun,
-#rotate-btn[aria-pressed="true"] .icon-play,
-#rotate-btn[aria-pressed="false"] .icon-pause {
+#tour-btn[aria-pressed="true"] .icon-play,
+#tour-btn[aria-pressed="false"] .icon-stop {
   display: none;
 }
 
@@ -428,16 +436,357 @@ model-viewer > #ar-prompt > img {
   font-variant-numeric: tabular-nums;
 }
 
+/* ===== Book a demo ===== */
+.cta {
+  display: inline-flex;
+  align-items: center;
+  height: 36px;
+  padding: 0 16px;
+  border-radius: 999px;
+  background: var(--cyan);
+  color: #04161a;
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none;
+  white-space: nowrap;
+  box-shadow: 0 6px 20px rgba(0, 210, 230, 0.25);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.cta:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 8px 26px rgba(0, 210, 230, 0.35);
+}
+
+.cta:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 2px;
+}
+
+#demo-cta {
+  position: fixed;
+  top: max(14px, env(safe-area-inset-top, 0px));
+  right: max(20px, env(safe-area-inset-right, 0px));
+  z-index: 100;
+}
+
+/* ===== Key claims ===== */
+#claims {
+  position: fixed;
+  top: calc(max(16px, env(safe-area-inset-top, 0px)) + 52px);
+  left: max(20px, env(safe-area-inset-left, 0px));
+  z-index: 90;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  pointer-events: none;
+}
+
+#claims li {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: var(--ink-soft);
+  letter-spacing: 0.01em;
+}
+
+#claims li::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--cyan);
+  box-shadow: 0 0 8px var(--cyan);
+  flex: none;
+}
+
+/* ===== Points of interest ===== */
+.poi {
+  position: relative;
+  width: 22px;
+  height: 22px;
+  padding: 0;
+  border: 2px solid #fff;
+  border-radius: 50%;
+  background: rgba(0, 210, 230, 0.9);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.35);
+  cursor: pointer;
+  transition: opacity 0.25s ease, transform 0.2s ease;
+}
+
+/* Pulse ring: transform/opacity only, so it stays on the compositor. */
+.poi::after {
+  content: "";
+  position: absolute;
+  inset: -6px;
+  border-radius: 50%;
+  border: 2px solid rgba(0, 210, 230, 0.7);
+  animation: poi-pulse 2.4s ease-out infinite;
+}
+
+@keyframes poi-pulse {
+  from { transform: scale(0.6); opacity: 1; }
+  to { transform: scale(1.6); opacity: 0; }
+}
+
+.poi:hover,
+.poi.active {
+  transform: scale(1.15);
+}
+
+/* Hidden until the info button is on, or while the tour runs. */
+model-viewer:not(.pois-on):not(.touring) .poi,
+.poi.away {
+  opacity: 0;
+  visibility: hidden; /* also takes them out of keyboard focus */
+  pointer-events: none;
+  transition: opacity 0.25s ease, transform 0.2s ease, visibility 0s 0.25s;
+}
+
+.poi:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 4px;
+}
+
+.poi-label {
+  position: absolute;
+  left: calc(100% + 10px);
+  top: 50%;
+  transform: translateY(-50%);
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: var(--glass);
+  border: 1px solid var(--glass-line);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+}
+
+.poi:hover .poi-label,
+.poi:focus-visible .poi-label,
+.poi.active .poi-label {
+  opacity: 1;
+}
+
+@media (hover: none) {
+  .poi-label {
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .poi::after {
+    animation: none;
+  }
+}
+
+/* ===== Story card (hotspots and tour) ===== */
+#story {
+  position: fixed;
+  left: max(20px, env(safe-area-inset-left, 0px));
+  bottom: calc(24px + var(--safe-bottom));
+  z-index: 110;
+  width: min(360px, calc(100vw - 120px));
+  padding: 18px 20px 16px;
+  border-radius: 18px;
+  color: #fff;
+}
+
+#story[hidden] {
+  display: none;
+}
+
+.story-step {
+  margin: 0 0 4px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  color: var(--cyan);
+}
+
+#story h2 {
+  margin: 0 28px 6px 0;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+#story-text {
+  margin: 0 0 14px;
+  font-size: 14px;
+  line-height: 1.45;
+  color: rgba(255, 255, 255, 0.78);
+}
+
+.story-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.story-actions .cta {
+  margin-left: auto;
+  height: 34px;
+  font-size: 13px;
+}
+
+.story-close,
+.story-nav {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  padding: 0;
+  border: 1px solid var(--glass-line);
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.06);
+  color: #fff;
+  cursor: pointer;
+}
+
+.story-close {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 30px;
+  height: 30px;
+  border: 0;
+  background: transparent;
+}
+
+.story-close svg,
+.story-nav svg {
+  width: 18px;
+  height: 18px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.story-link {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--cyan);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.story-close:focus-visible,
+.story-nav:focus-visible,
+.story-link:focus-visible {
+  outline: 2px solid var(--cyan);
+  outline-offset: 2px;
+}
+
+/* ===== QR (desktop "view in your space") ===== */
+#qr-btn {
+  position: fixed;
+  left: 50%;
+  bottom: calc(24px + var(--safe-bottom));
+  transform: translateX(-50%);
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  height: 48px;
+  padding: 0 22px 0 18px;
+  border-radius: 999px;
+  color: #fff;
+  font-size: 15px;
+  font-weight: 500;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+#qr-btn[hidden] {
+  display: none;
+}
+
+#qr-btn svg {
+  width: 20px;
+  height: 20px;
+  fill: none;
+  stroke: var(--cyan);
+  stroke-width: 1.7;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+#qr-dialog {
+  width: min(340px, calc(100vw - 32px));
+  padding: 24px;
+  border-radius: 20px;
+  color: #fff;
+  text-align: center;
+}
+
+#qr-dialog::backdrop {
+  background: rgba(0, 0, 0, 0.55);
+}
+
+#qr-dialog h2 {
+  margin: 0 0 6px;
+  font-size: 18px;
+}
+
+#qr-dialog p {
+  margin: 0 0 16px;
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.75);
+}
+
+#qr-code {
+  display: grid;
+  place-items: center;
+  min-height: 200px;
+  margin: 0 auto 16px;
+  padding: 12px;
+  border-radius: 12px;
+  background: #fff;
+  color: #333;
+  font-size: 13px;
+}
+
+#qr-code svg {
+  width: 200px;
+  height: 200px;
+}
+
+/* Arrived from the QR code: draw attention to the AR button. */
+#ar-button.pulse {
+  animation: ar-pulse 1.2s ease-in-out 4;
+}
+
+@keyframes ar-pulse {
+  50% { box-shadow: 0 0 0 10px rgba(0, 210, 230, 0.25), 0 8px 24px rgba(0, 0, 0, 0.16); }
+}
+
 /* ===== Toast ===== */
 #toast {
   position: fixed;
   left: 50%;
   bottom: calc(88px + var(--safe-bottom));
   z-index: 200;
+  /* Size to the message (a left:50% box would otherwise shrink to half the screen and wrap). */
+  width: max-content;
+  max-width: calc(100vw - 32px);
   padding: 10px 16px;
-  border-radius: 999px;
+  border-radius: 20px;
   color: #fff;
   font-size: 13px;
+  text-align: center;
   opacity: 0;
   pointer-events: none;
   transform: translate(-50%, 8px);
@@ -467,6 +816,74 @@ model-viewer > #ar-prompt > img {
   }
 }
 
+/* Narrower screens: lift the card above the centred AR / QR button. */
+@media (max-width: 1000px) {
+  #story {
+    bottom: calc(84px + var(--safe-bottom));
+  }
+}
+
+/* Phones: claims become a swipeable chip row, the card sits above the AR button. */
+@media (max-width: 700px) {
+  #demo-cta {
+    height: 32px;
+    padding: 0 12px;
+    font-size: 13px;
+    right: max(12px, env(safe-area-inset-right, 0px));
+  }
+
+  #claims {
+    top: calc(max(16px, env(safe-area-inset-top, 0px)) + 40px);
+    left: 0;
+    right: 0;
+    flex-direction: row;
+    gap: 6px;
+    padding: 0 12px;
+    overflow-x: auto;
+    scrollbar-width: none;
+    pointer-events: auto;
+  }
+
+  #claims::-webkit-scrollbar {
+    display: none;
+  }
+
+  #claims li {
+    flex: none;
+    padding: 5px 10px;
+    border-radius: 999px;
+    background: var(--glass);
+    border: 1px solid var(--glass-line);
+    color: rgba(255, 255, 255, 0.85);
+    font-size: 12px;
+  }
+
+  #story {
+    left: max(12px, env(safe-area-inset-left, 0px));
+    right: 76px;
+    width: auto;
+    bottom: calc(84px + var(--safe-bottom));
+    padding: 14px 16px 12px;
+  }
+
+  #story h2 {
+    font-size: 16px;
+  }
+
+  #story-text {
+    font-size: 13px;
+    margin-bottom: 10px;
+  }
+
+  .poi-label {
+    opacity: 0;
+  }
+
+  .poi.active .poi-label {
+    opacity: 1;
+  }
+}
+
 /* Landscape phones: the full-size toolbar (~300px) would not fit the height. */
 @media (max-height: 440px) {
   #toolbar {
@@ -483,7 +900,17 @@ model-viewer > #ar-prompt > img {
     margin: 2px 0;
   }
 
-  #ar-button {
+  #ar-button,
+  #qr-btn {
     bottom: calc(12px + var(--safe-bottom));
+  }
+
+  /* Not enough height for the claims list and the card together. */
+  #claims {
+    display: none;
+  }
+
+  #story {
+    bottom: calc(68px + var(--safe-bottom));
   }
 }

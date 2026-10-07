@@ -45,6 +45,52 @@
     <img class="product" src="massbox_logo.png" alt="MASSBOX®">
   </header>
 
+  <a id="demo-cta" class="cta" href="https://www.exuminstruments.com/book-a-demo" target="_blank" rel="noopener">Book a demo</a>
+
+  <!-- Key claims (wording from the MASSBOX product video) -->
+  <ul id="claims" aria-label="Highlights">
+    <li>Field deployable</li>
+    <li>No hazardous consumables</li>
+    <li>No specialist operator</li>
+    <li>No acid digestion</li>
+    <li>No mirror polishing</li>
+    <li>Pump down &lt; 1 minute</li>
+  </ul>
+
+  <!-- Hotspot / tour card -->
+  <section id="story" aria-live="polite" hidden>
+    <button id="story-close" class="story-close" aria-label="Close">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" /></svg>
+    </button>
+    <p id="story-step" class="story-step"></p>
+    <h2 id="story-title"></h2>
+    <p id="story-text"></p>
+    <div class="story-actions">
+      <button id="story-prev" class="story-nav" aria-label="Previous">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 18l-6-6 6-6" /></svg>
+      </button>
+      <button id="story-next" class="story-nav" aria-label="Next">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 18l6-6-6-6" /></svg>
+      </button>
+      <button id="story-tour" class="story-link">Take the full tour</button>
+      <a id="story-cta" class="cta" href="https://www.exuminstruments.com/book-a-demo" target="_blank" rel="noopener">Book a demo</a>
+    </div>
+  </section>
+
+  <!-- Desktop: scan to open AR on a phone -->
+  <button id="qr-btn" hidden>
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <rect x="6" y="2" width="12" height="20" rx="2" /><path d="M11 18h2" />
+    </svg>
+    View in your space
+  </button>
+  <dialog id="qr-dialog" aria-labelledby="qr-title">
+    <h2 id="qr-title">Place MASSBOX® in your space</h2>
+    <p>Scan with your phone camera, then tap “View in your space”.</p>
+    <div id="qr-code"></div>
+    <button id="qr-close" class="story-link">Close</button>
+  </dialog>
+
   <model-viewer id="massbox" src="Mass.glb" ios-src="Mass.usdz" poster="poster.webp" alt="MASSBOX® benchtop mass spectrometer"
     ar ar-modes="webxr scene-viewer quick-look" ar-scale="fixed" ar-placement="floor"
     camera-controls auto-rotate
@@ -70,6 +116,17 @@
       <span class="dim-label" id="dim-height" data-axis="y">23.2 in</span>
       <span class="dim-label" id="dim-depth" data-axis="z">26.8 in</span>
     </div>
+
+    <!-- Points of interest (metres, model space). Tapping one opens its story card. -->
+    <button class="poi" slot="hotspot-poi-screen" data-stop="screen" data-position="-0.174m 0.377m 0.328m" data-normal="0 0 1">
+      <span class="poi-label">Touchscreen</span>
+    </button>
+    <button class="poi" slot="hotspot-poi-door" data-stop="door" data-position="0.230m 0.400m 0.288m" data-normal="0 0.34 0.94">
+      <span class="poi-label">Sample door</span>
+    </button>
+    <button class="poi" slot="hotspot-poi-ports" data-stop="ports" data-position="-0.521m 0.129m -0.125m" data-normal="-1 0 0">
+      <span class="poi-label">Power &amp; I/O</span>
+    </button>
 
     <!-- Empty slot hides model-viewer's default bar; the loading screen shows progress. -->
     <div slot="progress-bar"></div>
@@ -105,6 +162,11 @@
         </svg>
       </button>
     </div>
+    <button id="poi-btn" class="tool" aria-label="Points of interest" aria-pressed="false" data-tip="Points of interest">
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <circle cx="12" cy="12" r="9" /><path d="M12 16v-4" /><path d="M12 8h.01" />
+      </svg>
+    </button>
     <button id="banana-btn" class="tool" aria-label="Banana for scale" aria-pressed="false" data-tip="Banana for scale">
       <svg viewBox="0 0 24 24" aria-hidden="true">
         <path d="M4 13c3.5-2 8-2 10 2a5.5 5.5 0 0 1 8 5" />
@@ -112,12 +174,12 @@
       </svg>
     </button>
     <span class="tool-sep"></span>
-    <button id="rotate-btn" class="tool" aria-label="Auto-rotate" aria-pressed="true" data-tip="Stop rotation">
-      <svg class="icon-pause" viewBox="0 0 24 24" aria-hidden="true">
-        <rect x="6" y="5" width="4" height="14" rx="1" /><rect x="14" y="5" width="4" height="14" rx="1" />
-      </svg>
+    <button id="tour-btn" class="tool" aria-label="Guided tour" aria-pressed="false" data-tip="Play tour">
       <svg class="icon-play" viewBox="0 0 24 24" aria-hidden="true">
         <path d="M7 4.5v15l12-7.5z" />
+      </svg>
+      <svg class="icon-stop" viewBox="0 0 24 24" aria-hidden="true">
+        <rect x="6" y="6" width="12" height="12" rx="1.5" />
       </svg>
     </button>
     <button id="theme-btn" class="tool" aria-label="Switch theme" data-tip="Light mode">
@@ -139,6 +201,7 @@
 
   <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.4.0/model-viewer.min.js"></script>
   <script type="module" src="script.js"></script>
+  <script type="module" src="stories.js"></script>
 </body>
 
 </html>

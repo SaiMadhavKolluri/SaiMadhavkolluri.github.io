@@ -1,4 +1,7 @@
-const viewer = document.querySelector('model-viewer');
+// Shared with stories.js (hotspots, tour, kiosk, QR).
+export const viewer = document.querySelector('model-viewer');
+let resolveScreenVideo;
+export const screenVideoReady = new Promise((resolve) => (resolveScreenVideo = resolve));
 
 // === Loading screen ===
 const loadingScreen = document.getElementById('loading-screen');
@@ -30,14 +33,14 @@ viewer.addEventListener('error', (error) => {
 // === Toast ===
 const toast = document.getElementById('toast');
 let toastTimer = 0;
-function showToast(message) {
+export function showToast(message, ms = 1800) {
   toast.textContent = message;
   toast.classList.add('show');
   clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => toast.classList.remove('show'), 1800);
+  toastTimer = setTimeout(() => toast.classList.remove('show'), ms);
 }
 
-function setPressed(button, pressed) {
+export function setPressed(button, pressed) {
   button.setAttribute('aria-pressed', String(pressed));
 }
 
@@ -55,26 +58,6 @@ document.getElementById('share-btn').addEventListener('click', async () => {
     if (err.name !== 'AbortError') console.error('Error sharing:', err);
   }
 });
-
-// === Auto-rotate toggle ===
-const rotateBtn = document.getElementById('rotate-btn');
-function syncRotate() {
-  // Fall back to the attribute in case the element hasn't upgraded yet.
-  const on = viewer.autoRotate ?? viewer.hasAttribute('auto-rotate');
-  setPressed(rotateBtn, on);
-  rotateBtn.dataset.tip = on ? 'Stop rotation' : 'Auto-rotate';
-}
-const IDLE_DELAY = 3000; // model-viewer default: resume rotating 3 s after a drag
-rotateBtn.addEventListener('click', () => {
-  viewer.autoRotate = !viewer.autoRotate;
-  // Pressing play should start right away, not after the idle delay.
-  if (viewer.autoRotate) viewer.autoRotateDelay = 0;
-  syncRotate();
-});
-viewer.addEventListener('camera-change', (event) => {
-  if (event.detail.source === 'user-interaction') viewer.autoRotateDelay = IDLE_DELAY;
-});
-syncRotate();
 
 // === Reset view ===
 const homeOrbit = viewer.getAttribute('camera-orbit');
@@ -146,11 +129,8 @@ bananaBtn.addEventListener('click', () => {
 });
 
 // === Load-in effects ===
-const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-if (reduceMotion) {
-  viewer.removeAttribute('auto-rotate');
-  syncRotate();
-}
+export const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+if (reduceMotion) viewer.removeAttribute('auto-rotate');
 viewer.addEventListener('load', () => {
   if (reduceMotion) return;
 
@@ -272,20 +252,23 @@ viewer.addEventListener('load', () => {
   video.setAttribute('webkit-playsinline', '');
   video.style.cssText = 'position:fixed;left:0;top:0;width:1px;height:1px;opacity:0;pointer-events:none;';
   document.body.appendChild(video);
+  resolveScreenVideo(video);
+
+  // A display only emits light. Black base + metallic 1 means the surface reflects nothing
+  // (no diffuse, zero specular), so the studio lighting can't lay a grey veil over the
+  // picture. Applied right away so the still image before the video looks the same.
+  screen.setEmissiveFactor([1, 1, 1]);
+  screen.pbrMetallicRoughness.setBaseColorFactor([0, 0, 0, 1]);
+  screen.pbrMetallicRoughness.setMetallicFactor(1);
+  screen.pbrMetallicRoughness.setRoughnessFactor(1);
 
   // Swap in only once a real frame exists, so the still image shows until then.
   const apply = () => {
-    // A display only emits light: show the video through emissive alone. Using it as base
-    // colour too lets the studio lighting add on top and washes the picture out.
     screen.emissiveTexture.setTexture(videoTexture);
     // Video textures upload flipped relative to glTF UVs: flip V back.
     const { sampler } = screen.emissiveTexture.texture;
     sampler.setScale({ u: 1, v: -1 });
     sampler.setOffset({ u: 0, v: 1 });
-    screen.setEmissiveFactor([1, 1, 1]);
-    screen.pbrMetallicRoughness.setBaseColorFactor([0, 0, 0, 1]);
-    screen.pbrMetallicRoughness.setRoughnessFactor(1);
-    screen.pbrMetallicRoughness.setMetallicFactor(0);
   };
   if ('requestVideoFrameCallback' in video) {
     video.requestVideoFrameCallback(apply);
